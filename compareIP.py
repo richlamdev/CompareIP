@@ -23,7 +23,7 @@ if argc < 3:
     print ("")
     print ("Notes: 1) Duplicate entries within same file are deduplicated.")
     print ("       2) IP addresses are checked for validity.")
-    print ("       3) IP addresses are sorted on output and identical to file.")
+    print ("       3) IP addresses are sorted on output.") 
     print ("")
     sys.exit()
 else:
