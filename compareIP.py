@@ -11,7 +11,7 @@ argc = len(sys.argv)
 
 if argc < 3:
     print ("")
-    print ("Usage: python3 compare_ip_lists.py <input file one>  <input file two>")
+    print ("Usage: python3 compareIP.py <input file one>  <input file two>")
     print ("")
     print ("")
     print ("File Format:")
