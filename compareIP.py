@@ -3,6 +3,8 @@
 # Richard Lam, October 2019
 #
 # Script to compare IP's from two separate files.  Delimited (separated) by newline (\n)
+# 
+# Written for Python 3
 
 import sys
 import ipaddress
@@ -36,13 +38,16 @@ with open(file1, 'r') as list1:
 with open(file2, 'r') as list2:
     listb = list2.readlines()
 
-comm = set(lista).intersection(listb)
+#comm = set(lista).intersection(listb)
+comm = set(lista) & set(listb)
 common = sorted(ipaddress.ip_address(line.strip()) for line in comm)
 
-diffa = list(set(lista) - set(listb))
+#diffa = list(set(lista) - set(listb))
+diffa = set(lista) - set(listb)
 differencea = sorted(ipaddress.ip_address(line.strip()) for line in diffa)
 
-diffb = list(set(listb) - set(lista))
+#diffb = list(set(listb) - set(lista))
+diffb = set(listb) - set(lista)
 differenceb = sorted(ipaddress.ip_address(line.strip()) for line in diffb)
 
 print ("")
