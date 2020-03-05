@@ -34,9 +34,9 @@ else:
 
 # Read in the files, and sort list
 with open(file1, 'r') as list1:
-    lista = list1.readlines()
+    lista = [line.rstrip() for line in list1]
 with open(file2, 'r') as list2:
-    listb = list2.readlines()
+    listb = [line.rstrip() for line in list2]
 
 #comm = set(lista).intersection(listb)
 comm = set(lista) & set(listb)
