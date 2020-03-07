@@ -1,79 +1,85 @@
 #!/bin/usr/python
-
-# Richard Lam, October 2019
 #
-# Script to compare IP's from two separate files.  Delimited (separated) by newline (\n)
+# Richard Lam, October 2019
+# Rewritten with argparse March 2019
+#
+# Script to compare IP's from two separate files.  
+# Delimited (separated) by newline (\n)
 # 
 # Written for Python 3
 
 import sys
 import ipaddress
+import argparse
 
-argc = len(sys.argv)
+def compare_files(args):
 
-if argc < 3:
-    print ("")
-    print ("Usage: python3 compareIP.py <input file one>  <input file two>")
-    print ("")
-    print ("")
-    print ("File Format:")
-    print ("IP's listed in file, one per line.")
-    print ("192.168.1.1")
-    print ("192.168.2.3")
-    print ("10.255.2.5")
-    print ("172.16.8.8")
-    print ("")
-    print ("Notes: 1) Duplicate entries within same file are deduplicated.")
-    print ("       2) IP addresses are checked for validity.")
-    print ("       3) IP addresses are sorted on output.") 
-    print ("")
-    sys.exit()
-else:
-    file1 = sys.argv[1]
-    file2 = sys.argv[2]
+    file1 = args.first_list.name
+    file2 = args.second_list.name
 
-# Read in the files, and sort list
-with open(file1, 'r') as list1:
-    lista = [line.rstrip() for line in list1]
-with open(file2, 'r') as list2:
-    listb = [line.rstrip() for line in list2]
+    with args.first_list as firstfile:
+        lista = [line.rstrip() for line in firstfile]
 
-#comm = set(lista).intersection(listb)
-comm = set(lista) & set(listb)
-common = sorted(ipaddress.ip_address(line.strip()) for line in comm)
+    with args.second_list as secondfile:
+        listb = [line.rstrip() for line in secondfile]
 
-#diffa = list(set(lista) - set(listb))
-diffa = set(lista) - set(listb)
-differencea = sorted(ipaddress.ip_address(line.strip()) for line in diffa)
+    # determine common IP's between files
+    comm = set(lista) & set(listb)
+    common = sorted(ipaddress.ip_address(line.strip()) for line in comm)
 
-#diffb = list(set(listb) - set(lista))
-diffb = set(listb) - set(lista)
-differenceb = sorted(ipaddress.ip_address(line.strip()) for line in diffb)
+    # determine IP's only in first file
+    diffa = set(lista) - set(listb)
+    differencea = sorted(ipaddress.ip_address(line.strip()) for line in diffa)
 
-print ("")
-print ("IP's in both files:")
-print(*common, sep = "\n")
-print ("")
-print ("IP's only in: " + file1 )
-print(*differencea, sep = "\n")
-print ("")
-print ("IP's only in: " + file2 )
-print(*differenceb, sep = "\n")
+    # determine IP's only in second file
+    diffb = set(listb) - set(lista)
+    differenceb = sorted(ipaddress.ip_address(line.strip()) for line in diffb)
 
-with open(file1 + "_" + file2 + "_common_ips","w",newline='\n') as common_file:
-    for ip in common:
-        print(ip, sep='', file=common_file)
+    print ()
+    print ("IP's common to " + file1 + " and " + file2)
+    print(*common, sep = "\n")
+    print ()
+    print ("IP's only in: " + file1 )
+    print(*differencea, sep = "\n")
+    print ()
+    print ("IP's only in: " + file2 )
+    print(*differenceb, sep = "\n")
 
-with open(file1 + "_" + file2 + "_ips_only_in_" + file1,"w",newline='\n') as diff_filea:
-    for ip in differencea:
-        print(ip, sep='', file=diff_filea)
+    with open(file1 + "_" + file2 + "_ips_common.txt","w") as common_file:
+        for ip in common:
+            print(ip, sep='', file=common_file)
 
-with open(file1 + "_" + file2 + "_ips_only_in_" + file2,"w",newline='\n') as diff_fileb:
-    for ip in differenceb:
-        print(ip, sep='', file=diff_fileb)
+    with open(file1 + "_" + file2 + "_ips_only_in_" + file1,"w") as diff_filea:
+        for ip in differencea:
+            print(ip, sep='', file=diff_filea)
 
-print ("")
-print ("Files created:")
-print (file1 + "_" + file2 + "_common_ips")
-print (file1 + "_" + file2 + "_ips_only_in_" + file1)
-print (file1 + "_" + file2 + "_ips_only_in_" + file2)
+    with open(file1 + "_" + file2 + "_ips_only_in_" + file2,"w") as diff_fileb:
+        for ip in differenceb:
+            print(ip, sep='', file=diff_fileb)
+
+    print ()
+    print ("Files created:")
+    print (file1 + "_" + file2 + "_ips_common.txt")
+    print (file1 + "_" + file2 + "_ips_only_in_" + file1)
+    print (file1 + "_" + file2 + "_ips_only_in_" + file2)
+
+def main():
+    parser = argparse.ArgumentParser (add_help=True,
+             description="Compares two lists of IP's.\n\n\
+Output: IP's common to both files.  IP's must be valid format.\n\
+        IP's exclusive to the first file.\n\
+        IP's exclusive to the second file.", 
+    formatter_class=argparse.RawTextHelpFormatter)
+
+    parser.add_argument('first_list', type=argparse.FileType('r'),
+                        metavar="<first file>", help="list of ip's, Format: one IP per line.")
+
+    parser.add_argument('second_list', type=argparse.FileType('r'),
+                        metavar="<second file>", help="list of ip's, Format: one IP per line.")
+
+    args = parser.parse_args()
+
+    compare_files (args)
+
+if __name__ == "__main__":
+    main()
